@@ -1,0 +1,5 @@
+/board/
+/common/
+/dbconnect.properties
+/replay/
+/sqlMapConfig.xml

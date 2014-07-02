@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC '-//ibatis.apache.org//DTD Sql Map 2.0//EN' 'http://ibatis.apache.org/dtd/sql-map-2.dtd'>
+
+<sqlMap namespace="Board">
+
+	<typeAlias alias="boardDTO" type="board.dto.BoardDTO" />
+	<typeAlias alias="ReadcntDTO" type="board.dto.ReadcntDTO" />
+	
+	<!-- 리절트 맵 정의 -->
+	<resultMap id="boardRes1" class="boardDTO">
+		<result property="board_seq_num" column="board_seq_num" />
+		<result property="board_subject" column="board_subject" />
+		<result property="board_content" column="board_content" />
+		<result property="board_writer" column="board_writer" />
+		<result property="board_reg_date" column="board_reg_date" />
+		<result property="board_readcnt" column="board_readcnt" />
+		<result property="board_group" column="board_group" />
+		<result property="board_relevel" column="board_relevel" />
+		<result property="board_restep" column="board_restep" />
+		<result property="board_password" column="board_password" />
+		<result property="rownum" column="r" />
+	</resultMap>
+	
+	<resultMap id="boardRes" class="boardDTO">
+		<result property="board_seq_num" column="board_seq_num" />
+		<result property="board_subject" column="board_subject" />
+		<result property="board_content" column="board_content" />
+		<result property="board_writer" column="board_writer" />
+		<result property="board_reg_date" column="board_reg_date" />
+		<result property="board_readcnt" column="board_readcnt" />
+		<result property="board_group" column="board_group" />
+		<result property="board_relevel" column="board_relevel" />
+		<result property="board_restep" column="board_restep" />
+		<result property="board_password" column="board_password" />
+	</resultMap>
+	
+	<resultMap id="readCntRes" class="ReadcntDTO">
+		<result property="readCnt_seq_num" column="readCnt_seq_num" />
+		<result property="readCnt_log" column="readCnt_log" />
+	</resultMap>
+
+
+
+
+	<!-- common -->
+	<sql id="select-all">
+		select * from btboard
+	</sql>
+	
+	
+	
+	
+	
+	<!-- insert -->
+	<insert id="insertBoard" parameterClass="boardDTO">
+		insert into btBoard
+			(board_seq_num, board_subject, board_content, board_writer, board_reg_date, board_group, board_relevel, board_restep, board_password)
+		values
+			(board_seq_num.NEXTVAL, #board_subject#, #board_content#, #board_writer#, #board_reg_date#, board_seq_num.NEXTVAL, #board_relevel#, #board_restep#, #board_password#)
+	</insert>
+	
+	<insert id="insertRBoard" parameterClass="boardDTO">
+		insert into btBoard
+			(board_seq_num, board_subject, board_content, board_writer, board_reg_date, board_group, board_relevel, board_restep, board_password)
+		values
+			(board_seq_num.NEXTVAL, #board_subject#, #board_content#, #board_writer#, #board_reg_date#, #board_group#, #board_relevel#, #board_restep#, #board_password#)
+	</insert>
+	
+	<insert id="insertReadCnt" parameterClass="java.lang.String">
+		insert into readcnt_table
+			(readCnt_seq_num, readCnt_log)
+		values
+			(readcnt_seq_num.NEXTVAL, #readCnt_log#)
+	</insert>
+	
+	
+	
+	
+	
+	<!-- select -->
+	<select id="selectAll" resultMap="boardRes" parameterClass="int">
+		<include refid="select-all" />
+		order by board_seq_num desc
+	</select>
+	
+	<select id="newList" resultMap="boardRes" parameterClass="int">
+		<include refid="select-all" />
+		where board_relevel = 0
+		order by board_seq_num desc
+	</select>
+	
+	<select id="selectAllrownum" resultMap="boardRes1" parameterClass="int">
+		select board_seq_num, board_subject, board_content, board_writer, board_reg_date, board_readcnt, board_group, board_relevel, board_restep, board_password, r from (select board_seq_num, board_subject, board_content, board_writer, board_reg_date, board_readcnt, board_group, board_relevel, board_restep, board_password, rownum r from (select * from btboard order by board_group desc, board_restep asc)order by board_group desc, board_restep asc) where r>=0 and 10000>=r 
+	</select>
+	
+	<select id="selectBoardOne" resultMap="boardRes" parameterClass="int">
+		<include refid="select-all" />
+		where board_seq_num = #board_seq_num#
+	</select>
+	
+	<select id="selectReplay" resultMap="boardRes" parameterClass="int">
+		<include refid="select-all" />
+		where board_group = #board_group# and board_relevel > 0
+	</select>
+	
+	<select id="selectWithSubject" resultMap="boardRes" parameterClass="java.lang.String">
+		select * from btboard
+		where board_subject like  '%'||#userinput#||'%'
+	</select>
+	
+	<select id="selectWithContent" resultMap="boardRes" parameterClass="java.lang.String">
+		select * from btboard
+		where board_content like '%'||#userinput#||'%'
+	</select>
+	
+	<select id="selectWithWriter" resultMap="boardRes" parameterClass="java.lang.String">
+		select * from btboard
+		where board_writer like '%'||#userinput#||'%'
+	</select>
+	
+	<select id="selectCountForReadCnt" resultClass ="int" parameterClass="java.lang.String">
+		select count(*) from readcnt_table
+		WHERE readCnt_log = #parameter#
+	</select>
+		
+
+
+
+	<!-- update -->
+	<update id="updateBoardReadcnt" parameterClass="boardDTO">
+		UPDATE btboard
+		SET board_readcnt = board_readcnt + 1
+		where board_seq_num = #board_seq_num#
+	</update>
+	
+	<update id="updateBoardOne" parameterClass="boardDTO">
+		UPDATE btboard
+		SET
+			board_subject = #board_subject#,
+			board_content = #board_content#
+		where board_seq_num = #board_seq_num#
+	</update>
+	
+	<update id="updateBoardRestep" parameterClass="boardDTO">
+		UPDATE btboard
+		SET board_restep = board_restep+1
+		where board_group = #board_group# and board_restep >= #board_restep#
+	</update>
+	
+	<update id="updateBoardSubject" parameterClass="boardDTO">
+		UPDATE btboard
+		SET
+			board_subject = #board_subject#
+		where board_seq_num = #board_seq_num#
+	</update>
+	
+	
+	
+	<!-- delete -->
+	<delete id="deleteBoard" parameterClass="boardDTO">
+		delete from btboard
+		where board_seq_num = #board_seq_num#	
+	</delete>
+
+
+</sqlMap>

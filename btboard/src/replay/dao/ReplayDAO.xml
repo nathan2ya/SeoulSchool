@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC '-//ibatis.apache.org//DTD Sql Map 2.0//EN' 'http://ibatis.apache.org/dtd/sql-map-2.dtd'>
+
+<sqlMap namespace="Replay">
+
+	<typeAlias alias="replayDTO" type="replay.dto.ReplayDTO" />
+	
+	<!-- 리절트 맵 정의 -->
+	<resultMap id="replayRes" class="replayDTO">
+		<result property="replay_seq_num" column="replay_seq_num" />
+		<result property="replay_board_seq_num" column="replay_board_seq_num" />
+		<result property="replay_writer" column="replay_writer" />
+		<result property="replay_password" column="replay_password" />
+		<result property="replay_content" column="replay_content" />
+		<result property="replay_reg_date" column="replay_reg_date" />
+		<result property="replay_isUpdating" column="replay_isUpdating" />
+	</resultMap>
+
+
+	
+	<!-- insert -->
+	<insert id="insertReplay" parameterClass="replayDTO">
+		insert into replay_board
+			(replay_seq_num, replay_board_seq_num, replay_writer, replay_password, replay_content, replay_reg_date)
+		values
+			(replay_seq_num.NEXTVAL, #replay_board_seq_num#, #replay_writer#, #replay_password#, #replay_content#, #replay_reg_date#)
+	</insert>
+	
+	
+	
+	<!-- select -->
+	<select id="selectAll" resultMap="replayRes" parameterClass="int">
+		select * from replay_board
+		where replay_board_seq_num = #replay_board_seq_num#
+		order by replay_seq_num desc
+	</select>
+	
+	<select id="selectReplayOne" resultMap="replayRes" parameterClass="int">
+		select * from replay_board
+		where replay_seq_num = #replay_seq_num#
+	</select>
+	
+	<select id="selectReplayOneforUpdate" resultMap="replayRes" parameterClass="replayDTO">
+		select * from replay_board
+		where replay_seq_num = #replay_seq_num# and replay_board_seq_num = #replay_board_seq_num#
+	</select>
+
+
+	<!-- update -->
+	<update id="updateReplayChoosen" parameterClass="replayDTO">
+		UPDATE replay_board
+		SET
+			replay_content = #replay_content#,
+			replay_isUpdating = 0
+		where replay_seq_num = #replay_seq_num#
+	</update>
+	
+	<update id="updateIsupdating" parameterClass="int">
+		UPDATE replay_board
+		SET
+			replay_isUpdating = 1
+		where replay_seq_num = #replay_seq_num#
+	</update>
+	
+	
+	
+	
+	<!-- delete -->
+	<delete id="deleteReplay" parameterClass="replayDTO">
+		delete from replay_board
+		where replay_seq_num = #replay_seq_num#	
+	</delete>
+	
+	<delete id="deleteBoard" parameterClass="replayDTO">
+		delete from replay_board
+		where replay_board_seq_num = #replay_board_seq_num#	
+	</delete>
+	
+
+</sqlMap>
